@@ -8,7 +8,7 @@ initializeDatabase(inputDatabase);
 explain(`Database initialized, shards: ${shardCount()}.`);
 
 explain("\nstep 2 (client): create the query");
-const mobileNumber = 9846819066;
+const mobileNumber = 8846819001;
 const shardIndex = shardIndexOf(mobileNumber);
 const query = createEncryptedQuery(mobileNumber);
 explain(
@@ -20,6 +20,6 @@ const encryptedResult = processShardQuery(shardIndex, query);
 explain("Encrypted result after homomorphic multiply sent back to client");
 
 explain("\nstep 4 (client): decrypt the result and print!");
-const exists = encryptedResult ?? decryptResult(encryptedResult);
+const exists = decryptResult(encryptedResult);
 explain(`Key ${mobileNumber} present:`);
 explain(exists ? "Yes" : "No");

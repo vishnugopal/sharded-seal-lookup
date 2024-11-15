@@ -1,4 +1,4 @@
-import { seal, context, indexInShardOf } from "./common";
+import { seal, context, indexInShardOf, shardSize, explain } from "./common";
 
 const { publicKey, secretKey } = generateKeys();
 
@@ -58,6 +58,8 @@ function createEncryptedQuery(mobileNumber: number) {
  * @returns Whether the mobile number exists in the server database.
  */
 function decryptResult(encryptedResultArray: Uint8Array) {
+  explain("Inside decryptedResult", 3);
+
   const encryptedResult = seal.CipherText();
   encryptedResult.loadArray(context, encryptedResultArray);
 
@@ -73,8 +75,13 @@ function decryptResult(encryptedResultArray: Uint8Array) {
   decryptedResult.delete();
   encryptedResult.delete();
 
+  // Make sure that the slice is normalized to the shard size.
+  const normalizedSlice = decodedResult.slice(0, shardSize);
+
+  explain(`Decoded result: ${normalizedSlice}`, 2);
+
   // Check if any bits are set, if so, the number exists in the server database.
-  const exists = decodedResult.some((bit) => bit === 1);
+  const exists = normalizedSlice.some((bit) => bit === 1);
 
   return exists;
 }

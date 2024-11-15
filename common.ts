@@ -93,7 +93,9 @@ function indexInShardOf(mobileNumber: number) {
  * values (2, 3) for more detailed walkthroughs of everything happening.
  */
 function explain(text, explainLevel = 1) {
-  if (!(process.env.EXPLAIN === explainLevel.toString())) {
+  const explainLevelFromEnv = parseInt(process.env.EXPLAIN || "0");
+
+  if (explainLevelFromEnv < explainLevel) {
     return;
   }
 

@@ -111,10 +111,29 @@ function processShardQuery(shardIndex: number, encryptedArray: Uint8Array) {
  * Returns a shard as a Uint8Array.
  *
  * @param shardIndex The index of the shard to return.
- * @returns The shard as a Uint8Array.
+ * @returns The shard value as a seal PlainText structure.
  */
 function shardAsPlainText(shardIndex) {
-  const shard = getShard(shardIndex);
+  let shard = getShard(shardIndex);
+
+  /**
+   * If the shard doesn't exist, we create a new one with all 0s.
+   * Except, SEAL doesn't like it as it has inbuilt protection for
+   * homomorphic operations that result in transparent ciphertexts
+   * (ciphertexts whose underlying plaintext is known). So we increase
+   * the shardSize by 1 and set the last element to 1.
+   *
+   * The client will normalize the data received and only extract the
+   * relevantSlice from 0...shardSize, and will ignore this set bit.
+   * This lets us preserve the interfaces as such.
+   *
+   * To see this error in action, uncomment the `shard[shardSize] = 1;`
+   * line below.
+   */
+  if (!shard) {
+    shard = new Uint8Array(shardSize + 1);
+    shard[shardSize] = 1;
+  }
 
   const batchEncoder = seal.BatchEncoder(context);
   const result = seal.PlainText();
@@ -145,7 +164,8 @@ function insertMobileNumberInShards(shards, mobileNumber: number) {
 
   const shard = getShard(shardIndex);
 
-  shard[indexInShard] = 1;
+  // shard! because we just created the shard above.
+  shard![indexInShard] = 1;
 }
 
 /**
@@ -170,10 +190,6 @@ function createShardIfEmpty(shardIndex) {
  */
 function getShard(shardIndex: number) {
   const shard = shards.get(shardIndex);
-
-  if (!shard) {
-    throw new Error(`Shard ${shardIndex} does not exist.`);
-  }
 
   return shard;
 }
