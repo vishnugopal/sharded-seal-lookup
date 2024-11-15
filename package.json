@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "node-seal": "^5.1.4"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.1.13"
+  }
+}
