@@ -12,7 +12,7 @@ const mobileNumber = 9846819066;
 const shardIndex = shardIndexOf(mobileNumber);
 const query = createEncryptedQuery(mobileNumber);
 explain(
-  `Sent encrypted query to server with shardIndex: ${shardIndex} asking for ${mobileNumber}`
+  `Made an encrypted query to send to the server with shardIndex: ${shardIndex} asking for ${mobileNumber}`
 );
 
 explain("\nstep 3 (server): process the query");
