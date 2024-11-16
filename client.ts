@@ -30,7 +30,7 @@ function createEncryptedQuery(mobileNumber: number) {
   const batchEncoder = seal.BatchEncoder(context);
   const encryptor = seal.Encryptor(context, publicKey);
 
-  const query = new Uint32Array(batchEncoder.slotCount).fill(0);
+  const query = new Uint32Array(batchEncoder.slotCount);
   query[indexInShardOf(mobileNumber)] = 1; // Target the index within the shard
 
   const plainQuery = seal.PlainText();

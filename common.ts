@@ -19,15 +19,15 @@ const context = getSealContext();
 const shardSize = 20;
 
 /**
- * Sets various rqeuired homomorphic encryption constants.
+ * Sets various required homomorphic encryption constants.
  *
  * @returns The encryption constants for the database
  */
 function getEncryptionConstants() {
   const polyModulusDegree = 4096;
-  const coeffModulusBitSizes = [36, 36, 37];
+  const securityLevel = seal.SecurityLevel.tc128;
   const plainModulusBitSize = 20;
-  return { polyModulusDegree, coeffModulusBitSizes, plainModulusBitSize };
+  return { polyModulusDegree, securityLevel, plainModulusBitSize };
 }
 
 /**
@@ -36,7 +36,7 @@ function getEncryptionConstants() {
  * @returns The SEAL context for the encryption parameters
  */
 function getSealContext() {
-  const { polyModulusDegree, coeffModulusBitSizes, plainModulusBitSize } =
+  const { polyModulusDegree, securityLevel, plainModulusBitSize } =
     getEncryptionConstants();
 
   // Set encryption parameters
@@ -45,10 +45,7 @@ function getSealContext() {
 
   parms.setPolyModulusDegree(polyModulusDegree); // Optimized for shard size
   parms.setCoeffModulus(
-    seal.CoeffModulus.Create(
-      polyModulusDegree,
-      Int32Array.from(coeffModulusBitSizes)
-    )
+    seal.CoeffModulus.BFVDefault(polyModulusDegree, securityLevel)
   );
   parms.setPlainModulus(
     seal.PlainModulus.Batching(polyModulusDegree, plainModulusBitSize)
