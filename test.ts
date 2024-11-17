@@ -3,7 +3,9 @@ import { shardCount, initializeDatabase, processShardQuery } from "./server";
 import { createEncryptedQuery, decryptResult } from "./client";
 
 explain("\nstep 1 (server): database initialization");
-const inputDatabase = [9846819001, 9846819002, 9846819066];
+const inputDatabase = [
+  9846819001, 9846819002, 9846819003, 9846819006, 9846819007,
+];
 initializeDatabase(inputDatabase);
 explain(`Database initialized, shards: ${shardCount()}.`);
 

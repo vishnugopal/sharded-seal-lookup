@@ -14,7 +14,11 @@ const context = getSealContext();
  * This is the shard size (the number of values that will be stored together). These
  * number of results will also be returned by the server.
  *
- * The maximum value for this is the polyModulusDegree (see getEncryptionConstants)
+ * The maximum value for this usually the polyModulusDegree (see getEncryptionConstants).
+ * In our implementation, we use an extra byte to store a 1 when the entire shard
+ * is empty (to avoid transparent ciphers), and so it is polyModulusDegree - 1.
+ *
+ * We're setting this to a lower value here for demonstration purposes.
  */
 const shardSize = 20;
 
