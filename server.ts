@@ -92,6 +92,7 @@ function initializeDatabase(mobileNumbers: number[]) {
 function processShardQuery(shardIndex: number, encryptedArray: Uint8Array) {
   const encryptedQuery = seal.CipherText();
   encryptedQuery.loadArray(context, encryptedArray);
+  explain(`Processing encrypted shard query, shardIndex: ${shardIndex}`, 2);
 
   const evaluator = seal.Evaluator(context);
   const result = seal.CipherText();
@@ -100,6 +101,8 @@ function processShardQuery(shardIndex: number, encryptedArray: Uint8Array) {
   evaluator.multiplyPlain(encryptedQuery, shardAsPlainText(shardIndex), result);
 
   const resultArray = result.saveArray();
+  explain("Homomorphic multiplication done");
+  explain(`Multiplied array ${resultArray}`, 3);
 
   evaluator.delete();
   result.delete();
@@ -131,9 +134,12 @@ function shardAsPlainText(shardIndex) {
    * line below.
    */
   if (!shard) {
+    explain("Shard does not exist, creating an empty one.", 1);
     shard = new Uint8Array(shardSize + 1);
     shard[shardSize] = 1;
   }
+
+  explain(`Shard contents: ${shard.slice(0, shardSize)}`, 2);
 
   const batchEncoder = seal.BatchEncoder(context);
   const result = seal.PlainText();

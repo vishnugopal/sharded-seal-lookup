@@ -32,6 +32,7 @@ function createEncryptedQuery(mobileNumber: number) {
 
   const query = new Uint32Array(batchEncoder.slotCount);
   query[indexInShardOf(mobileNumber)] = 1; // Target the index within the shard
+  explain(`Query constructed: ${query.slice(0, shardSize)}`);
 
   const plainQuery = seal.PlainText();
 

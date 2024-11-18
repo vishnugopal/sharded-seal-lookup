@@ -12,10 +12,10 @@ explain(`Database initialized, shards: ${shardCount()}.`);
 explain("\nstep 2 (client): create the query");
 const mobileNumber = 9846819001;
 const shardIndex = shardIndexOf(mobileNumber);
-const query = createEncryptedQuery(mobileNumber);
 explain(
-  `Made an encrypted query to send to the server with shardIndex: ${shardIndex} asking for ${mobileNumber}`
+  `Making an encrypted query to send to the server with shardIndex: ${shardIndex} asking for ${mobileNumber}`
 );
+const query = createEncryptedQuery(mobileNumber);
 
 explain("\nstep 3 (server): process the query");
 const encryptedResult = processShardQuery(shardIndex, query);
