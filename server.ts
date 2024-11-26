@@ -131,7 +131,7 @@ function shardAsPlainText(shardIndex) {
    * This lets us preserve the interfaces as such.
    *
    * To see this error in action, uncomment the `shard[shardSize] = 1;`
-   * line below.
+   * line below and run with a query that does not exist in the DB.
    */
   if (!shard) {
     explain("Shard does not exist, creating an empty one.", 1);

@@ -10,7 +10,7 @@ initializeDatabase(inputDatabase);
 explain(`Database initialized, shards: ${shardCount()}.`);
 
 explain("\nstep 2 (client): create the query");
-const mobileNumber = 9846819001;
+const mobileNumber = 8846819001;
 const shardIndex = shardIndexOf(mobileNumber);
 explain(
   `Making an encrypted query to send to the server with shardIndex: ${shardIndex} asking for ${mobileNumber}`
