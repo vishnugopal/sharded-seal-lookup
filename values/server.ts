@@ -5,6 +5,7 @@ import {
   valueSize,
   shardIndexOf,
   indexInShardOf,
+  setIndexInShard,
   explain,
 } from "./common";
 
@@ -13,8 +14,7 @@ import {
  *
  * This is implemented as a Map, so we can have sparse shards.
  */
-const shards = new Map<number, Uint8Array>();
-const valueShards = new Map<number, Uint32Array>();
+const shards = new Map<number, Uint32Array>();
 
 /**
  * Get the number of shards in the database.
@@ -41,21 +41,7 @@ function initializeDatabase(mobileNumbersAndNames: {
     `Total shards: ${totalShards} assuming max mobile number is ${maxNumber}`
   );
 
-  // Mark existing numbers as 1 (present)
-  for (const mobileNumber of Object.keys(mobileNumbersAndNames)) {
-    const shardIndex = shardIndexOf(Number(mobileNumber));
-
-    explain(
-      `Storing mobile number ${mobileNumber} in shard ${shardIndex} at index ${indexInShardOf(
-        Number(mobileNumber)
-      )}.`,
-      2
-    );
-
-    insertMobileNumberInShards(Number(mobileNumber));
-  }
-
-  // Now store the values as plaintext.
+  // Store the values as plaintext according to indexInShardOf(mobileNumber)
   for (const mobileNumber of Object.keys(mobileNumbersAndNames)) {
     const shardIndex = shardIndexOf(Number(mobileNumber));
 
@@ -118,10 +104,11 @@ function processShardQuery(shardIndex: number, encryptedArray: Uint8Array) {
   const evaluator = seal.Evaluator(context);
   const result = seal.CipherText();
 
-  // Server data is stored unencrypted, so we can multiply it directly
+  // Now let's multiply with the valueShard as well.
   evaluator.multiplyPlain(encryptedQuery, shardAsPlainText(shardIndex), result);
 
   const resultArray = result.saveArray();
+
   explain("Homomorphic multiplication done");
   explain(`Multiplied array ${resultArray}`, 3);
 
@@ -156,7 +143,7 @@ function shardAsPlainText(shardIndex) {
    */
   if (!shard) {
     explain("Shard does not exist, creating an empty one.", 1);
-    shard = new Uint8Array(shardSize + 1);
+    shard = new Uint32Array(shardSize + 1);
     shard[shardSize] = 1;
   }
 
@@ -169,27 +156,6 @@ function shardAsPlainText(shardIndex) {
   batchEncoder.delete();
 
   return result;
-}
-
-/**
- * Inserts a mobile number in the appropriate position in the shard.
- * We use shardIndexOf and indexInShardOf to determine the position.
- * This acts like a bloom filter: if the number is present, we mark it
- * the appropriate position with 1, otherwise it's initialized to 0.
- *
- * We try to do this in a sparse manner, so we only create shards when
- * necessary.
- *
- * @param mobileNumber
- */
-function insertMobileNumberInShards(mobileNumber: number) {
-  const shardIndex = shardIndexOf(mobileNumber);
-  const indexInShard = indexInShardOf(mobileNumber);
-
-  createShardIfEmpty(shardIndex);
-  const shard = getShard(shardIndex);
-
-  setIndexInShard(shard, indexInShard);
 }
 
 /**
@@ -208,43 +174,10 @@ function insertValueInShards(mobileNumber: number, value: string) {
   const shardIndex = shardIndexOf(mobileNumber);
   const indexInShard = indexInShardOf(mobileNumber);
 
-  createValueShardIfEmpty(shardIndex);
+  createShardIfEmpty(shardIndex);
   const shard = getShard(shardIndex);
 
-  setIndexInShard(shard, indexInShard, value);
-}
-
-/**
- * Sets the index in the shard to all 1s, starting at indexInShard and ending
- * at indexInShard + valueSize.
- *
- * @param shard The shard to set.
- * @param indexInShard The index in the shard to set.
- * @param value The value to set, 1 by default.
- */
-function setIndexInShard(
-  shard: Uint8Array | undefined,
-  indexInShard: number,
-  value: number | string = 1
-) {
-  if (!shard) {
-    return;
-  }
-
-  // If the value is a number, we set all positions to that value.
-  if (typeof value === "number") {
-    for (let i = indexInShard; i < indexInShard + valueSize; i++) {
-      shard[i] = value;
-    }
-  }
-
-  // If the value is a string, we set all positions to the charCode of that string or 0 if the string has terminated.
-  if (typeof value === "string") {
-    for (let i = indexInShard; i < indexInShard + valueSize; i++) {
-      const character = value.charCodeAt(i - indexInShard);
-      shard[i] = isNaN(character) ? 0 : character;
-    }
-  }
+  shards[shardIndex] = setIndexInShard(shard, indexInShard, value);
 }
 
 /**
@@ -255,7 +188,7 @@ function setIndexInShard(
  */
 function createShardIfEmpty(shardIndex) {
   if (!shards.has(shardIndex)) {
-    shards.set(shardIndex, new Uint8Array(shardSize));
+    shards.set(shardIndex, new Uint32Array((shardSize + 1) * valueSize));
   }
 }
 
@@ -269,32 +202,6 @@ function createShardIfEmpty(shardIndex) {
  */
 function getShard(shardIndex: number) {
   const shard = shards.get(shardIndex);
-
-  return shard;
-}
-
-/**
- * Creates and initializes a shard if it doesn't exist.
- * We just populate the shard with 0s by initializing it with a Uint8Array.
- *
- * @param shardIndex
- */
-function createValueShardIfEmpty(shardIndex) {
-  if (!valueShards.has(shardIndex)) {
-    valueShards.set(shardIndex, new Uint32Array(shardSize));
-  }
-}
-
-/**
- * Get the value shard at the specified index, safely. If the shard doesn't exist,
- * we throw an error.
- *
- * @param shardIndex The shard index to retrieve.
- *
- * @returns The shard as a Uint8Array.
- */
-function getValueShard(shardIndex: number) {
-  const shard = valueShards.get(shardIndex);
 
   return shard;
 }

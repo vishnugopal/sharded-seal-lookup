@@ -8,7 +8,7 @@ import { createEncryptedQuery, decryptResult } from "./values/client";
 
 explain("\nstep 1 (server): database initialization");
 const inputDatabase = {
-  9846819001: "Abel",
+  9846819001: "Abelet",
   9846819002: "Bhaskar",
   9846819003: "Cain",
   9846819006: "Doge",
@@ -18,10 +18,8 @@ const inputDatabase = {
 initializeDatabase(inputDatabase);
 explain(`Database initialized, shards: ${shardCount()}.`);
 
-process.exit(0);
-
 explain("\nstep 2 (client): create the query");
-const mobileNumber = 8846819001;
+const mobileNumber = 9846819001;
 const shardIndex = shardIndexOf(mobileNumber);
 explain(
   `Making an encrypted query to send to the server with shardIndex: ${shardIndex} asking for ${mobileNumber}`

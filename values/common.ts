@@ -93,7 +93,48 @@ function shardIndexOf(mobileNumber: number) {
  * @returns The index of the mobile number in the shard.
  */
 function indexInShardOf(mobileNumber: number) {
-  return (mobileNumber % shardSize) * valueSize;
+  return (mobileNumber % (shardSize + 1)) * valueSize;
+}
+
+/**
+ * Sets the index in the shard to the value, starting at indexInShard and ending
+ * at indexInShard + valueSize.
+ *
+ * @param shard The shard to set.
+ * @param indexInShard The index in the shard to set.
+ * @param value The value to set, 1 by default.
+ */
+function setIndexInShard(
+  shard: Uint8Array | Uint32Array | undefined,
+  indexInShard: number,
+  value: number | string = 1
+) {
+  if (!shard) {
+    return;
+  }
+
+  // If the value is a number, we set all positions to that value.
+  if (typeof value === "number") {
+    for (let i = indexInShard; i < indexInShard + valueSize; i++) {
+      shard[i] = value;
+    }
+  }
+
+  // If the value is a string, we set all positions to the charCode of that string until the string terminates.
+  if (typeof value === "string") {
+    for (let i = indexInShard; i < indexInShard + valueSize; i++) {
+      const characterCode = value.charCodeAt(i - indexInShard);
+
+      // characterCode is NaN when the string length is done.
+      if (isNaN(characterCode)) {
+        break;
+      }
+
+      shard[i] = characterCode;
+    }
+  }
+
+  return shard;
 }
 
 /**
@@ -119,5 +160,6 @@ export {
   shardIndexOf,
   indexInShardOf,
   getEncryptionConstants,
+  setIndexInShard,
   explain,
 };

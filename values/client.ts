@@ -1,4 +1,12 @@
-import { seal, context, indexInShardOf, shardSize, explain } from "./common";
+import {
+  seal,
+  context,
+  indexInShardOf,
+  setIndexInShard,
+  shardSize,
+  valueSize,
+  explain,
+} from "./common";
 
 const { publicKey, secretKey } = generateKeys();
 
@@ -31,8 +39,10 @@ function createEncryptedQuery(mobileNumber: number) {
   const encryptor = seal.Encryptor(context, publicKey);
 
   const query = new Uint32Array(batchEncoder.slotCount);
-  query[indexInShardOf(mobileNumber)] = 1; // Target the index within the shard
-  explain(`Query constructed: ${query.slice(0, shardSize)}`);
+
+  setIndexInShard(query, indexInShardOf(mobileNumber));
+
+  explain(`Query constructed: ${query}`);
 
   const plainQuery = seal.PlainText();
 
@@ -56,7 +66,7 @@ function createEncryptedQuery(mobileNumber: number) {
  * and that's what's present in the encryptedResultArray.
  *
  * @param encryptedResultArray A Uint8Array representing the encrypted result.
- * @returns Whether the mobile number exists in the server database.
+ * @returns The value of the lookup.
  */
 function decryptResult(encryptedResultArray: Uint8Array) {
   explain("Inside decryptedResult", 3);
@@ -77,14 +87,19 @@ function decryptResult(encryptedResultArray: Uint8Array) {
   encryptedResult.delete();
 
   // Make sure that the slice is normalized to the shard size.
-  const normalizedSlice = decodedResult.slice(0, shardSize);
+  const normalizedSlice = decodedResult.slice(0, shardSize * valueSize);
 
   explain(`Decoded result: ${normalizedSlice}`, 2);
 
-  // Check if any bits are set, if so, the number exists in the server database.
-  const exists = normalizedSlice.some((bit) => bit === 1);
+  // Filter out 1s (set for empty state at the server) and 0s (set when there is no value at server end)
+  const value = normalizedSlice.filter((byte) => byte !== 1 && byte !== 0);
 
-  return exists;
+  // Now convert it to a string
+  const valueAsString = String.fromCharCode(...value);
+
+  explain(`Result: ${valueAsString}`);
+
+  return valueAsString;
 }
 
 export { secretKey, createEncryptedQuery, decryptResult };
