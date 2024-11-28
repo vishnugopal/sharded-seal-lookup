@@ -93,6 +93,8 @@ function shardIndexOf(mobileNumber: number) {
  * @returns The index of the mobile number in the shard.
  */
 function indexInShardOf(mobileNumber: number) {
+  // shardSize + 1 because of the extra byte we set to avoid transparent ciphers
+  // see: server.ts/shardAsPlainText
   return (mobileNumber % (shardSize + 1)) * valueSize;
 }
 

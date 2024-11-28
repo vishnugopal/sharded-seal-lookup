@@ -42,7 +42,13 @@ function createEncryptedQuery(mobileNumber: number) {
 
   setIndexInShard(query, indexInShardOf(mobileNumber));
 
-  explain(`Query constructed: ${query}`);
+  // shardSize + 1 is because we have to account for transparent ciphers
+  // see server.ts/shardAsPlainText
+  explain(
+    `Query constructed, populating at index(${indexInShardOf(
+      mobileNumber
+    )}) : ${query.slice(0, (shardSize + 1) * valueSize)}`
+  );
 
   const plainQuery = seal.PlainText();
 
@@ -87,7 +93,9 @@ function decryptResult(encryptedResultArray: Uint8Array) {
   encryptedResult.delete();
 
   // Make sure that the slice is normalized to the shard size.
-  const normalizedSlice = decodedResult.slice(0, shardSize * valueSize);
+  // shardSize + 1 is because we have to account for transparent ciphers
+  // see server.ts/shardAsPlainText
+  const normalizedSlice = decodedResult.slice(0, (shardSize + 1) * valueSize);
 
   explain(`Decoded result: ${normalizedSlice}`, 2);
 
@@ -95,11 +103,7 @@ function decryptResult(encryptedResultArray: Uint8Array) {
   const value = normalizedSlice.filter((byte) => byte !== 1 && byte !== 0);
 
   // Now convert it to a string
-  const valueAsString = String.fromCharCode(...value);
-
-  explain(`Result: ${valueAsString}`);
-
-  return valueAsString;
+  return String.fromCharCode(...value);
 }
 
 export { secretKey, createEncryptedQuery, decryptResult };

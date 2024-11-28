@@ -147,7 +147,7 @@ function shardAsPlainText(shardIndex) {
     shard[shardSize] = 1;
   }
 
-  explain(`Shard contents: ${shard.slice(0, shardSize)}`, 2);
+  explain(`Shard contents: ${shard.slice(0, shardSize * valueSize)}`, 2);
 
   const batchEncoder = seal.BatchEncoder(context);
   const result = seal.PlainText();

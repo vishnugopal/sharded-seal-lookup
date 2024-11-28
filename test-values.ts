@@ -8,7 +8,7 @@ import { createEncryptedQuery, decryptResult } from "./values/client";
 
 explain("\nstep 1 (server): database initialization");
 const inputDatabase = {
-  9846819001: "Abelet",
+  9846819001: "Abelet Winston",
   9846819002: "Bhaskar",
   9846819003: "Cain",
   9846819006: "Doge",
@@ -31,6 +31,10 @@ const encryptedResult = processShardQuery(shardIndex, query);
 explain("Encrypted result after homomorphic multiply sent back to client");
 
 explain("\nstep 4 (client): decrypt the result and print!");
-const exists = decryptResult(encryptedResult);
-explain(`Key ${mobileNumber} present:`);
-explain(exists ? "Yes" : "No");
+const value = decryptResult(encryptedResult);
+
+if (value.length === 0) {
+  explain("Result: empty");
+} else {
+  explain(`Result: ${value}`);
+}
