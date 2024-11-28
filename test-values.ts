@@ -1,17 +1,24 @@
-import { shardIndexOf, explain } from "./keys/common";
+import { shardIndexOf, explain } from "./values/common";
 import {
   shardCount,
   initializeDatabase,
   processShardQuery,
-} from "./keys/server";
-import { createEncryptedQuery, decryptResult } from "./keys/client";
+} from "./values/server";
+import { createEncryptedQuery, decryptResult } from "./values/client";
 
 explain("\nstep 1 (server): database initialization");
-const inputDatabase = [
-  9846819001, 9846819002, 9846819003, 9846819006, 9846819007,
-];
+const inputDatabase = {
+  9846819001: "Abel",
+  9846819002: "Bhaskar",
+  9846819003: "Cain",
+  9846819006: "Doge",
+  9846819007: "Elon",
+};
+
 initializeDatabase(inputDatabase);
 explain(`Database initialized, shards: ${shardCount()}.`);
+
+process.exit(0);
 
 explain("\nstep 2 (client): create the query");
 const mobileNumber = 8846819001;
