@@ -1,6 +1,6 @@
-import { shardIndexOf, explain } from "./common";
-import { shardCount, initializeDatabase, processShardQuery } from "./server";
-import { createEncryptedQuery, decryptResult } from "./client";
+import { shardIndexOf, explain } from "./keys/common";
+import { shardCount, initializeDatabase, processShardQuery } from "./keys/server";
+import { createEncryptedQuery, decryptResult } from "./keys/client";
 
 explain("\nstep 1 (server): database initialization");
 const inputDatabase = [
