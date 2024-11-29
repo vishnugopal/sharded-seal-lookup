@@ -106,4 +106,4 @@ function decryptResult(encryptedResultArray: Uint8Array) {
   return String.fromCharCode(...value);
 }
 
-export { secretKey, createEncryptedQuery, decryptResult };
+export { createEncryptedQuery, decryptResult };
