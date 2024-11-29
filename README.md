@@ -6,9 +6,10 @@ Sharded Seal Lookup aims to help folks learn how to implement [private informati
 
 1. First install [bun](https://bun.sh/), a fast batteries-included runtime for JavaScript and TypeScript.
 2. Run `bun install` to install the dependencies.
-3. Now `EXPLAIN=1 bun run test.js` should get you started.
+3. Now `EXPLAIN=1 bun run test.ts` should get you started.
+4. `test-values.ts` is the same as `test.ts` but with values instead of just the presence of mobile numbers.
 
-For more detailed explanations, you can increase the explain parameter above, i.e. `EXPLAIN=2 bun run test.js`.
+For more detailed explanations, you can increase the explain parameter above, i.e. `EXPLAIN=2 bun run test.ts`.
 
 ## Exploring the Code
 
