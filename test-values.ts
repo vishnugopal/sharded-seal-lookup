@@ -13,13 +13,14 @@ const inputDatabase = {
   9846819003: "Cain",
   9846819006: "Doge",
   9846819007: "Elon",
+  8065889001: "Ammu",
 };
 
 initializeDatabase(inputDatabase);
 explain(`Database initialized, shards: ${shardCount()}.`);
 
 explain("\nstep 2 (client): create the query");
-const mobileNumber = 9846819001;
+const mobileNumber = 8065889001;
 const shardIndex = shardIndexOf(mobileNumber);
 explain(
   `Making an encrypted query to send to the server with shardIndex: ${shardIndex} asking for ${mobileNumber}`
